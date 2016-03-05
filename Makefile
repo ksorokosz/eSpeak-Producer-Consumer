@@ -1,15 +1,20 @@
 CC = g++
 CFLAGS = -c -Wall -Wextra -g
-LDFLAGS = -L espeak-1.48.04-source/src
-IFLAGS = -I espeak-1.48.04-source/src
+ESPEAK_DIR = espeak-1.48.04-source/src
+LDFLAGS = -L $(ESPEAK_DIR)
+IFLAGS = -I $(ESPEAK_DIR)
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 DEPENDS = $(patsubst %.cpp,%.d,$(SOURCES))
 LIBS = -lespeak
 EXECUTABLE = espeak-sample
 
-all: $(DEPENDS) $(SOURCES) $(EXECUTABLE)
+all: espeak $(DEPENDS) $(SOURCES) $(EXECUTABLE)
 	#
+
+espeak:
+	cd $(ESPEAK_DIR) && $(MAKE)
+
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
 
@@ -20,9 +25,12 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(IFLAGS) $(CFLAGS) -c $*.cpp
 
 clean:
-	rm -f *.o *.d *~
+	rm -vf $(EXECUTABLE)
+	find -name "*~" -exec rm -vf {} \;
+	find -name "*.o" -exec rm -vf {} \;
+	find -name "*.d" -exec rm -vf {} \; 
 
-.PHONY: clean all 
+.PHONY: clean all espeak
 
 #
 # This line includes all the dependencies.

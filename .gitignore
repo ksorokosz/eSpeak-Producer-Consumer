@@ -4,6 +4,8 @@
 *.o
 *.obj
 *.d
+espeak-sample
+*~
 
 # Precompiled Headers
 *.gch
