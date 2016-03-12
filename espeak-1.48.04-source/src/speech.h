@@ -36,8 +36,6 @@
 #define NO_VARIADIC_MACROS
 #endif
 
-
-#define PLATFORM_POSIX
 #define PATHSEP  '/'
 // USE_PORTAUDIO or USE_PULSEAUDIO are now defined in the makefile
 //#define USE_PORTAUDIO
@@ -77,7 +75,14 @@ int LookupMnem(MNEM_TAB *table, const char *string);
 
 #ifdef PLATFORM_WINDOWS
 #define N_PATH_HOME  230
-#else
+// sleep(seconds)
+// Sleep(millisecond = 1/1000 s), windows api, kernel32.dll
+// usleep(microseconds = 1/1000000 s)
+#define sleep(x) Sleep(1000*x)
+// we are lucky, in current code usleep is always used in multiplies of 1000
+#define usleep(x) Sleep((x+500)/1000)
+#else /* PLATFORM_POSIX */
+#define PLATFORM_POSIX
 #define N_PATH_HOME  160
 #endif
 

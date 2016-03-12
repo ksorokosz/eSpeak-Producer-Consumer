@@ -17,6 +17,13 @@ LIBTAG = $(LIB_VERSION).$(RELEASE)
 
 # Use SONAME_OPT=-Wl,h, on Solaris
 SONAME_OPT=-Wl,-soname,
+ 
+ifdef PLATFORM_WINDOWS
+  LIB_NAME = libespeak.dll
+else
+  # On Windows not all source files are compiled
+  non_windows_SOURCES = mbrowrap.cpp
+endif
 
 # Use EXTRA_LIBS=-lm on Solaris
 EXTRA_LIBS =
@@ -72,12 +79,12 @@ endif
 
 speak_SOURCES = speak.cpp compiledict.cpp dictionary.cpp intonation.cpp \
 	readclause.cpp setlengths.cpp numbers.cpp synth_mbrola.cpp \
-	synthdata.cpp synthesize.cpp translate.cpp mbrowrap.cpp \
+	synthdata.cpp synthesize.cpp translate.cpp \
 	tr_languages.cpp voices.cpp wavegen.cpp phonemelist.cpp klatt.cpp sonic.cpp
 
 libespeak_SOURCES = speak_lib.cpp compiledict.cpp dictionary.cpp intonation.cpp \
 	readclause.cpp setlengths.cpp numbers.cpp synth_mbrola.cpp \
-	synthdata.cpp synthesize.cpp translate.cpp mbrowrap.cpp \
+	synthdata.cpp synthesize.cpp translate.cpp \
 	tr_languages.cpp voices.cpp wavegen.cpp phonemelist.cpp \
 	espeak_command.cpp event.cpp fifo.cpp $(WAVE) debug.cpp klatt.cpp sonic.cpp
 
@@ -94,7 +101,13 @@ OBJS3=$(patsubst %.cpp,%.o,$(SRCS3))
 LIBS3=-lstdc++ -L . -lespeak
 
 CXXFLAGS=-O2
-
+ifdef PLATFORM_WINDOWS
+  CXXFLAGS += -DPLATFORM_WINDOWS -DHAVE_STRUCT_TIMESPEC
+  LDFLAGS += -static-libgcc -static-libstdc++
+endif
+ifdef DEBUG
+  CXXFLAGS += -DDEBUG_ENABLED
+endif
 
 all: $(BIN_NAME) $(LIB_NAME) $(STATIC_LIB_NAME) $(BIN2_NAME)
 
@@ -116,9 +129,12 @@ x_%.o: %.cpp
 $(LIB_NAME): $(OBJS2)
 	$(CXX) $(LDFLAGS) -shared $(SONAME_OPT)$(LIB_NAME).$(LIB_VERSION) -o $@ \
 	$(OBJS2) $(LIBS2)
-	mv $(LIB_NAME) $(LIB_NAME).$(LIBTAG)
-	$(LN_SF) $(LIB_NAME).$(LIBTAG) $(LIB_NAME).$(LIB_VERSION)
-	$(LN_SF) $(LIB_NAME).$(LIB_VERSION) $(LIB_NAME)
+	$(if $(PLATFORM_WINDOWS), , \
+		mv $(LIB_NAME) $(LIB_NAME).$(LIBTAG); \
+		$(LN_SF) $(LIB_NAME).$(LIBTAG) $(LIB_NAME).$(LIB_VERSION); \
+		$(LN_SF) $(LIB_NAME).$(LIB_VERSION) $(LIB_NAME); \
+	)
+
 
 $(STATIC_LIB_NAME): $(OBJS2)
 	$(AR) cqs $(STATIC_LIB_NAME) $(OBJS2)
