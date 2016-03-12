@@ -10,9 +10,12 @@
 API_eSpeak::API_eSpeak(eSpeak_Language language) throw(eSpeak_exception)
 {
 	configuration.output = AUDIO_OUTPUT_PLAYBACK;
-	configuration.buflength = 500;
+	configuration.buflength = 10000;
 	configuration.options = espeakINITIALIZE_PHONEME_EVENTS | espeakINITIALIZE_PHONEME_IPA;
 	configuration.synthFlags = espeakCHARS_AUTO;
+	configuration.position_type = POS_CHARACTER;
+	configuration.unique_identifier = 0;
+	configuration.user_data = 0;
 
 	init_eSpeak();
 	set_voice(language);
@@ -43,7 +46,7 @@ void API_eSpeak::init_eSpeak()  throw(eSpeak_exception)
 {
 
 	espeak_Initialize(configuration.output, configuration.buflength,
-			          NULL, configuration.options );
+			          ".", configuration.options );
 
 	espeak_SetSynthCallback(eSpeak_phonemeCallback);
 }

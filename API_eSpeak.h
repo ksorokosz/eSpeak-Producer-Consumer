@@ -13,6 +13,12 @@
 #include <cstring>
 #include "speak_lib.h"
 
+#define PLATFORM_WINDOWS
+#ifdef PLATFORM_WINDOWS
+#include <windows.h>
+#define sleep(x) Sleep(1000*x)
+#endif
+
 using namespace std;
 
 struct eSpeak_Configuration

@@ -3,10 +3,9 @@ using namespace std;
 
 int main()
 {
-	string text = "Cześć to działa";
+	string text = "tralalala";
 	API_eSpeak eSpeak = API_eSpeak(API_eSpeak::POLISH);
 
-	char memory[30]; // i don't know why this is important!
 	eSpeak.synthesis(text.c_str(), text.length() + 1);
 
 	return 0;

@@ -29,3 +29,6 @@ espeak-sample
 *.exe
 *.out
 *.app
+
+!bin/*.dll
+!bin/*.exe
