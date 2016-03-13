@@ -32,3 +32,4 @@ espeak-sample
 
 !bin/*.dll
 !bin/*.exe
+!install/*.exe
