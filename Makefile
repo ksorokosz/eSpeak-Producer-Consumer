@@ -10,7 +10,7 @@ DEPENDS = $(patsubst %.cpp,%.d,$(SOURCES))
 LIBS = -lespeak
 EXECUTABLE = bin/espeak-sample
 
-all: portaudio espeak $(DEPENDS) $(SOURCES) $(EXECUTABLE)
+all: portaudio espeak synthesizer
 	#
 
 portaudio:
@@ -19,6 +19,9 @@ portaudio:
 
 espeak:
 	cd $(ESPEAK_DIR) && $(MAKE) libespeak.dll PLATFORM_WINDOWS=1 LIB_AUDIO="-L ../../portaudio/lib/.libs -lportaudio -lwinmm"
+	
+synthesizer: $(DEPENDS) $(SOURCES) $(EXECUTABLE)
+	#
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)

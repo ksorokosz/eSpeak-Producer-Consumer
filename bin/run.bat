@@ -1,5 +1,3 @@
-﻿
-(
-	echo "Cześć. Jestem syntezatorem."
-	echo "Miło mi."
-) | espeak-sample.exe
+chcp 65001
+type text.txt | espeak-sample.exe
+pause

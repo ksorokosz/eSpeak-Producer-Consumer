@@ -1,0 +1,2 @@
+﻿Cześć. Jestem syntezatorem.	1.wav
+Miło mi.	2.wav

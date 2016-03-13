@@ -12,6 +12,7 @@
 #include <exception>
 #include <cstring>
 #include "speak_lib.h"
+#include "AudioStream.h"
 
 #define PLATFORM_WINDOWS
 #ifdef PLATFORM_WINDOWS
@@ -94,23 +95,27 @@ class eSpeak_exception : public exception
 
 int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events);
 
+
+// eSpeak API
 class API_eSpeak
 {
 	public:
 		typedef enum { POLISH, ENGLISH } eSpeak_Language;
 
 		API_eSpeak(eSpeak_Language language) throw(eSpeak_exception);
+		API_eSpeak(eSpeak_Language language, string wavepath) throw(eSpeak_exception);
 		API_eSpeak(eSpeak_Language language, eSpeak_Configuration& configuration) throw(eSpeak_exception);
 		virtual ~API_eSpeak();
 
 		void synthesis(const char* array, int length);
-
+		
+		
 	protected:
 		void init_eSpeak() throw(eSpeak_exception);
 		void set_voice(eSpeak_Language language) throw(eSpeak_exception);
 		void init_polish();
 		void init_english();
-
+		
 	private:
 
 		eSpeak_Configuration configuration;

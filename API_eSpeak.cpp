@@ -11,11 +11,25 @@ API_eSpeak::API_eSpeak(eSpeak_Language language) throw(eSpeak_exception)
 {
 	configuration.output = AUDIO_OUTPUT_PLAYBACK;
 	configuration.buflength = 10000;
-	configuration.options = espeakINITIALIZE_PHONEME_EVENTS | espeakINITIALIZE_PHONEME_IPA;
+	configuration.options = espeakINITIALIZE_PHONEME_EVENTS;
 	configuration.synthFlags = espeakCHARS_AUTO;
 	configuration.position_type = POS_CHARACTER;
 	configuration.unique_identifier = 0;
 	configuration.user_data = 0;
+
+	init_eSpeak();
+	set_voice(language);
+}
+
+API_eSpeak::API_eSpeak(eSpeak_Language language, string wavepath) throw(eSpeak_exception)
+{
+	configuration.output = AUDIO_OUTPUT_RETRIEVAL;
+	configuration.buflength = 10000;
+	configuration.options = espeakINITIALIZE_PHONEME_EVENTS;
+	configuration.synthFlags = espeakCHARS_AUTO;
+	configuration.position_type = POS_CHARACTER;
+	configuration.unique_identifier = 0;
+	configuration.user_data = new AudioStream(wavepath);
 
 	init_eSpeak();
 	set_voice(language);
@@ -32,7 +46,10 @@ API_eSpeak::API_eSpeak(eSpeak_Language language, eSpeak_Configuration& configura
 
 API_eSpeak::~API_eSpeak()
 {
-
+	if ( configuration.user_data != NULL )
+	{
+		delete (Stream*)configuration.user_data;
+	}
 }
 
 void API_eSpeak::synthesis(const char* array, int length)
@@ -75,34 +92,27 @@ void API_eSpeak::init_english()
 
 }
 
-const char *PhonemeToString(unsigned int word)
-{
-    // Convert a phoneme mnemonic word into a string
-	int ix;
-	static char buf[5];
-
-	for(ix=0; ix<3; ix++){
-		buf[ix] = word >> (ix*8);
-	}
-	buf[4] = 0;
-	return(buf);
-}
-
 /* Phoneme Callback */
 int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 {//====================================================================
 	int type;
 	static int previous_position = 0; // previous position declared as static
-
+	static int samplerate = 0;
+	static Stream* audiostream = NULL;
+	
 	//Write phoneme transcription to stdout with timestamps
 	while((type = events->type) != 0)
 	{
 		switch ( type )
 		{
+			case espeakEVENT_SAMPLERATE:
+				samplerate = events->id.number;
+				audiostream = (Stream*)(events->user_data);
+				break;
+				
 			case espeakEVENT_PHONEME:
 				{
-					const char *word = PhonemeToString(events->id.number);
-					fprintf(stdout,"%4.3f\t%4.3f\t%s\n", (float)previous_position/1000, (float)events->audio_position/1000,word );
+					fprintf(stdout,"%4.3f\t%4.3f\t%s\n", (float)previous_position/1000, (float)events->audio_position/1000, events->id.string );
 					previous_position=events->audio_position;
 				}
 				break;
@@ -113,6 +123,34 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 		events++;
 	}
 
+	try
+	{
+		if ( audiostream == NULL )
+			return 0;
+		
+		if(wav == NULL)
+		{			
+				audiostream->close();
+				return 0;
+		}
+		
+		//Open wave file if it is not open
+		if( !audiostream->isopen() )
+		{
+			audiostream->init(&samplerate);
+		}
+		
+		//Write wav file
+		if(numsamples > 0)
+		{
+			audiostream->push(wav, numsamples);
+		}
+	}
+	catch ( exception& e)
+	{
+		e.what();
+		return 1;
+	}
+
 	return(0);
 }
-
