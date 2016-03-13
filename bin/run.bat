@@ -1,4 +1,5 @@
+chcp 65001;
 (
-	echo "Jestem syntezatorem."
-	echo "Mi�o mi."
+	echo "Cześć. Jestem syntezatorem."
+	echo "Miło mi."
 ) | espeak-sample.exe
