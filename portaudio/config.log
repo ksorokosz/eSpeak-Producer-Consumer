@@ -891,8 +891,8 @@ configure: failed program was:
 configure:15719: result: no
 configure:15730: checking for clock_gettime
 configure:15730: gcc -o conftest.exe -g -O2   conftest.c  >&5
-C:\Users\Kamil\AppData\Local\Temp\ccUg3SS3.o: In function `main':
-d:\Programowanie\Nauka\eSpeak-Sample\portaudio/conftest.c:58: undefined reference to `clock_gettime'
+C:\Users\Kamil\AppData\Local\Temp\cccXtHM2.o: In function `main':
+d:\Programowanie\Nauka\eSpeak-windows\portaudio/conftest.c:58: undefined reference to `clock_gettime'
 collect2.exe: error: ld returned 1 exit status
 configure:15730: $? = 1
 configure: failed program was:

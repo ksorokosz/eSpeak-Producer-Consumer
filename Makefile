@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -c -Wall -Wextra -g
 PORTAUDIO_DIR = portaudio
-ESPEAK_DIR = espeak-1.48.04-source/src
+ESPEAK_DIR = espeak/src
 LDFLAGS = -L $(ESPEAK_DIR)
 IFLAGS = -I $(ESPEAK_DIR)
 SOURCES = $(wildcard *.cpp)
@@ -33,11 +33,13 @@ $(EXECUTABLE): $(OBJECTS)
 
 clean:
 	rm -vf $(EXECUTABLE)
+	cd $(PORTAUDIO_DIR) && make clean
+	cd $(ESPEAK_DIR) && make clean
 	find -name "*~" -exec rm -vf {} \;
 	find -name "*.o" -exec rm -vf {} \;
-	find -name "*.d" -exec rm -vf {} \; 
-
-.PHONY: clean all espeak
+	find -name "*.d" -exec rm -vf {} \;
+	
+.PHONY: clean all espeak portaudio
 
 #
 # This line includes all the dependencies.
