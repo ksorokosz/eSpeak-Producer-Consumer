@@ -95,16 +95,21 @@ class eSpeak_exception : public exception
 
 int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events);
 
-
 // eSpeak API
 class API_eSpeak
 {
 	public:
 		typedef enum { POLISH, ENGLISH } eSpeak_Language;
+		
+		// User data
+		struct eSpeakUserData
+		{
+			string id;
+			Stream* audiostream;
+		};
 
-		API_eSpeak(eSpeak_Language language) throw(eSpeak_exception);
-		API_eSpeak(eSpeak_Language language, string wavepath) throw(eSpeak_exception);
-		API_eSpeak(eSpeak_Language language, eSpeak_Configuration& configuration) throw(eSpeak_exception);
+		API_eSpeak(eSpeak_Language language, string label) throw(eSpeak_exception);
+		API_eSpeak(eSpeak_Language language, string label, Stream* stream) throw(eSpeak_exception);
 		virtual ~API_eSpeak();
 
 		void synthesis(const char* array, int length);
@@ -117,7 +122,9 @@ class API_eSpeak
 		void init_english();
 		
 	private:
-
+	
+		eSpeakUserData user_data;
+		static unsigned int identifier;
 		eSpeak_Configuration configuration;
 };
 

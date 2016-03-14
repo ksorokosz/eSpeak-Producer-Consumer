@@ -7,49 +7,59 @@
 
 #include "API_eSpeak.h"
 
-API_eSpeak::API_eSpeak(eSpeak_Language language) throw(eSpeak_exception)
+const char *WordToString(unsigned int word)
+{//========================================
+// Convert a phoneme mnemonic word into a string
+	int ix;
+	static char buf[5];
+	 
+	for(ix=0; ix<3; ix++){
+		buf[ix] = word >> (ix*8);
+	}
+	buf[4] = 0;
+	return(buf);
+}
+
+// Initialize identifier
+unsigned int API_eSpeak::identifier = 0;
+
+API_eSpeak::API_eSpeak(eSpeak_Language language, string label) throw(eSpeak_exception)
 {
 	configuration.output = AUDIO_OUTPUT_PLAYBACK;
 	configuration.buflength = 10000;
-	configuration.options = espeakINITIALIZE_PHONEME_EVENTS;
+	configuration.options = espeakINITIALIZE_PHONEME_EVENTS | espeakINITIALIZE_PHONEME_IPA;
 	configuration.synthFlags = espeakCHARS_AUTO;
 	configuration.position_type = POS_CHARACTER;
-	configuration.unique_identifier = 0;
+	configuration.unique_identifier = &identifier;
 	configuration.user_data = 0;
 
 	init_eSpeak();
 	set_voice(language);
+	this->identifier++;
+	this->user_data.audiostream = NULL;
+	this->user_data.id = label;
 }
 
-API_eSpeak::API_eSpeak(eSpeak_Language language, string wavepath) throw(eSpeak_exception)
+API_eSpeak::API_eSpeak(eSpeak_Language language, string label, Stream* stream) throw(eSpeak_exception)
 {
 	configuration.output = AUDIO_OUTPUT_RETRIEVAL;
 	configuration.buflength = 10000;
-	configuration.options = espeakINITIALIZE_PHONEME_EVENTS;
+	configuration.options = espeakINITIALIZE_PHONEME_EVENTS | espeakINITIALIZE_PHONEME_IPA;
 	configuration.synthFlags = espeakCHARS_AUTO;
 	configuration.position_type = POS_CHARACTER;
-	configuration.unique_identifier = 0;
-	configuration.user_data = new AudioStream(wavepath);
+	configuration.unique_identifier = &identifier;
+
+	this->user_data.audiostream = stream;
+	this->user_data.id = label;
+	configuration.user_data = &user_data;
 
 	init_eSpeak();
 	set_voice(language);
-}
-
-API_eSpeak::API_eSpeak(eSpeak_Language language, eSpeak_Configuration& configuration)
-                throw(eSpeak_exception)
-{
-	this->configuration = configuration;
-
-	init_eSpeak();
-	set_voice(language);
+	this->identifier++;
 }
 
 API_eSpeak::~API_eSpeak()
 {
-	if ( configuration.user_data != NULL )
-	{
-		delete (Stream*)configuration.user_data;
-	}
 }
 
 void API_eSpeak::synthesis(const char* array, int length)
@@ -99,6 +109,7 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 	static int previous_position = 0; // previous position declared as static
 	static int samplerate = 0;
 	static Stream* audiostream = NULL;
+	static string id;
 	
 	//Write phoneme transcription to stdout with timestamps
 	while((type = events->type) != 0)
@@ -107,16 +118,25 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 		{
 			case espeakEVENT_SAMPLERATE:
 				samplerate = events->id.number;
-				audiostream = (Stream*)(events->user_data);
+				audiostream = ((API_eSpeak::eSpeakUserData*)(events->user_data))->audiostream;
+				id = ((API_eSpeak::eSpeakUserData*)(events->user_data))->id;
 				break;
 				
 			case espeakEVENT_PHONEME:
 				{
-					fprintf(stdout,"%4.3f\t%4.3f\t%s\n", (float)previous_position/1000, (float)events->audio_position/1000, events->id.string );
+					fprintf(stdout,"%s\t%4.5f\t%4.5f\t%s\n", id.c_str(),
+					                                         (float)previous_position/1000, 
+					                                         (float)events->audio_position/1000, events->id.string );
 					previous_position=events->audio_position;
 				}
 				break;
-
+				
+			case espeakEVENT_MSG_TERMINATED:
+				audiostream = NULL;
+				samplerate = 0;
+				previous_position = 0;
+				break;
+				
 			default:
 				break;
 		}

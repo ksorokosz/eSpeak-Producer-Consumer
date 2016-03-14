@@ -1,2 +1,2 @@
-﻿Cześć. Jestem syntezatorem.	1.wav
-Miło mi.	2.wav
+00001	00001.wav	Cze��. Jestem syntezatorem.
+00002	00002.wav	Do zobaczenia.

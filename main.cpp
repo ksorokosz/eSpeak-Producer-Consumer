@@ -26,26 +26,36 @@ int main()
 		vector<string> tokens;
 		
 		string token;
-		string file;
+		string text, label, file;
 		while(getline(iss, token, '\t')) 
 			tokens.push_back(token);
 	
-		string text = tokens[0];
-		if ( tokens.size() > 1 )
+		label = tokens[0]; // always first
+		text = tokens[tokens.size() - 1]; // always last
+		if ( tokens.size() > 2 )
+		{
 			file = tokens[1];
-
+		}
+		
 		// Synthesis
 		API_eSpeak* eSpeak = NULL; 
+		Stream* audiostream = NULL;
 		
 		if ( file.length() )
-			eSpeak = new API_eSpeak(API_eSpeak::POLISH, file);
+		{
+			audiostream = new AudioStream(file);
+			eSpeak = new API_eSpeak(API_eSpeak::POLISH, label, audiostream);
+		}
 		else
-			eSpeak = new API_eSpeak(API_eSpeak::POLISH);
+			eSpeak = new API_eSpeak(API_eSpeak::POLISH, label);
 		
 		eSpeak->synthesis(text.c_str(), text.length() + 1);
 		
 		if ( eSpeak )
 			delete eSpeak;
+		
+		if ( audiostream )
+			delete audiostream;
 	}
 
 	return 0;
