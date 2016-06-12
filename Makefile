@@ -8,7 +8,7 @@ SOURCES = $(wildcard *.cpp)
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 DEPENDS = $(patsubst %.cpp,%.d,$(SOURCES))
 LIBS = -lespeak
-EXECUTABLE = bin/espeak-sample
+EXECUTABLE = bin/espeak
 
 all: portaudio espeak synthesizer
 	#

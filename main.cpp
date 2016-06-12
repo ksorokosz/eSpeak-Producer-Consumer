@@ -14,8 +14,44 @@ istream &operator>>(istream &is, line &l)
     return is;
 }
 
-int main()
+// -p <pitch-value>
+int main(int argc, char * argv[])
 {
+	int pitch_value = 50;
+	int rate_value = 50;
+	
+	if ( argc > 1 )
+	{
+		for ( int i = 1; i < argc; i++ )
+		{
+			if ( string(argv[i]) == "-p" )
+			{
+				if ( argc < i+2 ) // i + 2 because argc = number of used switches + 1
+				{
+						fprintf(stderr, "Please provide pitch value\n");
+						exit(1);
+				}
+				
+				pitch_value = atoi(argv[++i]);
+			}
+			else if ( string(argv[i]) == "-r" )
+			{
+				if ( argc < i+2 ) // i + 2 because argc = number of used switches + 1
+				{
+						fprintf(stderr, "Please provide pitch value\n");
+						exit(1);
+				}
+				
+				rate_value = atoi(argv[++i]);
+			}
+			else
+			{
+				fprintf(stderr,"Unknown switch\n");
+				exit(1);
+			}
+		}
+	}
+		
 	istream_iterator<line> begin(cin);
 	istream_iterator<line> end;
 
@@ -49,6 +85,8 @@ int main()
 		else
 			eSpeak = new API_eSpeak(API_eSpeak::POLISH, label);
 		
+		eSpeak->set_pitch(pitch_value);
+		eSpeak->set_rate(rate_value);
 		eSpeak->synthesis(text.c_str(), text.length() + 1);
 		
 		if ( eSpeak )

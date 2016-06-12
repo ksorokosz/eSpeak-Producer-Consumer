@@ -91,6 +91,18 @@ void API_eSpeak::set_voice(eSpeak_Language language)  throw(eSpeak_exception)
 	}
 }
 
+void API_eSpeak::set_pitch(int value)
+{
+	espeak_SetParameter(espeakPITCH, value, 0);
+}
+
+void API_eSpeak::set_rate(int value)
+{
+	double wordrate = value * (450 - 80) / 100.0 + 80.0;
+
+	espeak_SetParameter(espeakRATE, (int)wordrate, 0);
+}
+
 void API_eSpeak::init_polish()
 {
 	espeak_SetVoiceByName("pl");
@@ -110,6 +122,8 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 	static int samplerate = 0;
 	static Stream* audiostream = NULL;
 	static string id;
+	int margin = 300; // 300 ms at the beginning
+
 	
 	//Write phoneme transcription to stdout with timestamps
 	while((type = events->type) != 0)
@@ -125,8 +139,8 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 			case espeakEVENT_PHONEME:
 				{
 					fprintf(stdout,"%s\t%4.5f\t%4.5f\t%s\n", id.c_str(),
-					                                         (float)previous_position/1000, 
-					                                         (float)events->audio_position/1000, events->id.string );
+					                                         (float)(margin + previous_position)/1000, 
+					                                         (float)(margin + events->audio_position)/1000, events->id.string );
 					previous_position=events->audio_position;
 				}
 				break;
@@ -158,6 +172,12 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 		if( !audiostream->isopen() )
 		{
 			audiostream->init(&samplerate);
+			int silencesamples = (samplerate * float(margin) / 1000);
+			short* silence = new short[silencesamples];
+			for ( int i = 0; i < silencesamples; i++ )
+				silence[i] = 0;
+			audiostream->push(silence, silencesamples);
+			delete [] silence;
 		}
 		
 		//Write wav file

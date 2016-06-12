@@ -112,8 +112,9 @@ class API_eSpeak
 		API_eSpeak(eSpeak_Language language, string label, Stream* stream) throw(eSpeak_exception);
 		virtual ~API_eSpeak();
 
+		void set_pitch(int value);
+		void set_rate(int value);
 		void synthesis(const char* array, int length);
-		
 		
 	protected:
 		void init_eSpeak() throw(eSpeak_exception);
