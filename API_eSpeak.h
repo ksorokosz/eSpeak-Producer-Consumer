@@ -14,7 +14,6 @@
 #include "speak_lib.h"
 #include "AudioStream.h"
 
-#define PLATFORM_WINDOWS
 #ifdef PLATFORM_WINDOWS
 #include <windows.h>
 #define sleep(x) Sleep(1000*x)

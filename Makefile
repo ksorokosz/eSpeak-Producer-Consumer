@@ -7,26 +7,49 @@ IFLAGS = -I $(ESPEAK_DIR)
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
 DEPENDS = $(patsubst %.cpp,%.d,$(SOURCES))
-LIBS = -lespeak
+LIBS = -lespeak -lportaudio
 EXECUTABLE = bin/espeak
 
-all: portaudio espeak synthesizer
+UNAME := $(shell uname)
+
+ifeq ($(UNAME), Linux)
+	TARGET=linux
+else
+	TARGET=windows
+endif
+
+all: $(TARGET)
+	#
+
+linux: espeak-linux synthesizer-linux
+	#
+
+windows: portaudio espeak-windows synthesizer-windows
 	#
 
 portaudio:
 
 	cd $(PORTAUDIO_DIR) && ./configure && $(MAKE)
 
-espeak:
+espeak-linux:
+	cd $(ESPEAK_DIR) && $(MAKE)
+	
+synthesizer-linux: $(DEPENDS) $(SOURCES) $(EXECUTABLE)
+	
+	cp $(ESPEAK_DIR)/libespeak.so ./bin
+	cp -R espeak/espeak-data ./bin
+
+espeak-windows:
 	cd $(ESPEAK_DIR) && $(MAKE) libespeak.dll PLATFORM_WINDOWS=1 LIB_AUDIO="-L ../../portaudio/lib/.libs -lportaudio -lwinmm"
 	
-synthesizer: $(DEPENDS) $(SOURCES) $(EXECUTABLE)
-	#
+synthesizer-windows: $(DEPENDS) $(SOURCES) $(EXECUTABLE)
+	
+	cp $(PORTAUDIO_DIR)/lib/.libs/libportaudio-2.dll ./bin
+	cp $(ESPEAK_DIR)/libespeak.dll ./bin
+	cp -R espeak/espeak-data ./bin
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ $(LIBS)
-	cp $(PORTAUDIO_DIR)/lib/.libs/libportaudio-2.dll ./bin
-	cp $(ESPEAK_DIR)/libespeak.dll ./bin
 
 %.d:
 	$(CC) $(IFLAGS) -MM $*.cpp > $*.d
@@ -42,7 +65,7 @@ clean:
 	find -name "*.o" -exec rm -vf {} \;
 	find -name "*.d" -exec rm -vf {} \;
 	
-.PHONY: clean all espeak portaudio
+.PHONY: clean all espeak-windows synthesizer-windows espeak-linux synthesizer-linux portaudio
 
 #
 # This line includes all the dependencies.

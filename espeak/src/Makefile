@@ -20,6 +20,7 @@ SONAME_OPT=-Wl,-soname,
  
 ifdef PLATFORM_WINDOWS
   LIB_NAME = libespeak.dll
+  non_windows_SOURCES = 
 else
   # On Windows not all source files are compiled
   non_windows_SOURCES = mbrowrap.cpp
@@ -77,12 +78,12 @@ endif
 endif
 endif
 
-speak_SOURCES = speak.cpp compiledict.cpp dictionary.cpp intonation.cpp \
+speak_SOURCES = $(non_windows_SOURCES) speak.cpp compiledict.cpp dictionary.cpp intonation.cpp \
 	readclause.cpp setlengths.cpp numbers.cpp synth_mbrola.cpp \
 	synthdata.cpp synthesize.cpp translate.cpp \
 	tr_languages.cpp voices.cpp wavegen.cpp phonemelist.cpp klatt.cpp sonic.cpp
 
-libespeak_SOURCES = speak_lib.cpp compiledict.cpp dictionary.cpp intonation.cpp \
+libespeak_SOURCES = $(non_windows_SOURCES) speak_lib.cpp compiledict.cpp dictionary.cpp intonation.cpp \
 	readclause.cpp setlengths.cpp numbers.cpp synth_mbrola.cpp \
 	synthdata.cpp synthesize.cpp translate.cpp \
 	tr_languages.cpp voices.cpp wavegen.cpp phonemelist.cpp \

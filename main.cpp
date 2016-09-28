@@ -4,6 +4,8 @@
 #include <iterator>
 #include <sstream>
 #include <vector>
+#include <cstring>
+#include <cstdlib>
 using namespace std;
 
 class line : public string {};
