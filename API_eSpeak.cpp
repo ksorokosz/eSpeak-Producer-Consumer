@@ -134,6 +134,9 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 				samplerate = events->id.number;
 				audiostream = ((API_eSpeak::eSpeakUserData*)(events->user_data))->audiostream;
 				id = ((API_eSpeak::eSpeakUserData*)(events->user_data))->id;
+				fprintf(stdout,"%s\t%4.5f\t%4.5f\t%s\n", id.c_str(),
+					        0.0, 
+					        0.0, "#" );
 				break;
 				
 			case espeakEVENT_PHONEME:
