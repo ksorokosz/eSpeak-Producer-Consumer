@@ -151,6 +151,9 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 			case espeakEVENT_MSG_TERMINATED:
 				audiostream = NULL;
 				samplerate = 0;
+				fprintf(stdout,"%s\t%4.5f\t%4.5f\t%s\n", id.c_str(),
+					        (float)(margin + previous_position)/1000, 
+					        (float)(2*margin + previous_position)/1000, "#" );
 				previous_position = 0;
 				break;
 				
@@ -167,8 +170,15 @@ int eSpeak_phonemeCallback(short *wav, int numsamples, espeak_EVENT *events)
 		
 		if(wav == NULL)
 		{			
-				audiostream->close();
-				return 0;
+			int silencesamples = (samplerate * float(margin) / 1000);
+			short* silence = new short[silencesamples];
+			for ( int i = 0; i < silencesamples; i++ )
+				silence[i] = 0;
+			audiostream->push(silence, silencesamples);
+			delete [] silence;
+
+			audiostream->close();
+			return 0;
 		}
 		
 		//Open wave file if it is not open
